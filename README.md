@@ -72,7 +72,7 @@ Credit from the source page: images made by Lethia; the page is Zexov's modified
 
 ## Packaging
 
-To build a fresh Windows `.exe` for testing:
+To build a fresh Windows `.exe` for usage:
 
 ```bat
 Build.bat
