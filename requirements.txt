@@ -1,0 +1,11 @@
+customtkinter>=5.2.2
+Pillow>=10.4.0
+mss>=9.0.1
+pytesseract>=0.3.13
+keyboard>=0.13.5
+pywin32>=306; platform_system == "Windows"
+psutil>=5.9.8
+packaging>=24.1
+requests>=2.32.3
+charset-normalizer>=3.3.2
+chardet>=5.2.0

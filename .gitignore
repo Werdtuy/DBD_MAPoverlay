@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+release/
+*.spec
+DBDCompanionOverlay.exe
+startup_error.log
+logs/
+plugins/
+Maps/Hens Callouts/
+config/settings.json
+config/*.tmp
+config/*.broken.json
