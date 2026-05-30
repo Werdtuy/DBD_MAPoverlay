@@ -37,33 +37,6 @@ Tesseract must be installed separately. If it is not on `PATH`, set its executab
 - `Maps/`, `config/`, `logs/`, and `plugins/` are runtime folders used beside the app
 - `build/` and `DBDCompanionOverlay.exe` are generated build output
 
-## Map Files
-
-Place images in `Maps/`. Supported extensions:
-
-- `.png`
-- `.webp`
-- `.gif`
-
-File names are used as map names. Variants are grouped automatically with names such as:
-
-```text
-The Game.png
-The Game - hatch.png
-The Game - alternate.webp
-```
-
-Optional metadata can live next to an image:
-
-```json
-{
-  "aliases": ["Gideon Meat Plant", "The Game"],
-  "template_region": [120, 80, 360, 140]
-}
-```
-
-Name the metadata file like the image with `.json` appended, for example `The Game.png.json`.
-
 ## Hens Callout Maps
 
 Use **Update Hens Maps** in the sidebar to download or refresh callout maps from [hens333.com/callouts](https://hens333.com/callouts) into `Maps/Hens Callouts/`. The app also checks this cache on startup. Existing cached images are skipped, so it only downloads maps that are missing locally.

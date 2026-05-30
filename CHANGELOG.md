@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 1.15
+
+- Removed outdated manual map-file setup instructions from the README.
+
 ## Beta 1.14
 
 - Added a remaining-time countdown over the temporary OCR scan box.
