@@ -1,15 +1,12 @@
 # Changelog
 
-## Versioning
+## Beta 1.12
 
-- Small fixes and minor refinements increment the hundredths place: `Beta 1.01`, `Beta 1.02`, `Beta 1.03`.
-- Larger features and meaningful UI changes increment the tenths place: `Beta 1.1`, `Beta 1.2`, `Beta 1.3`.
-- Every committed update gets its own beta version section.
+- Removed the public beta versioning explanation.
 
 ## Beta 1.11
 
 - Replaced the rolling Unreleased changelog with explicit beta versions.
-- Documented the beta version numbering rules.
 
 ## Beta 1.1
 
