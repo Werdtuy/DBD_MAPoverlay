@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 1.32
+
+- Added visible Hens333 callout-map credits and a link to the original callouts website.
+
 ## Beta 1.31
 
 - Fixed update checks so only versions newer than the running app are shown.

@@ -102,6 +102,11 @@ def create_release_zip(root: Path, exe_path: Path, manifest: dict[str, str]) -> 
                 "5. Windows may warn about unsigned apps. Allow the app if you trust the sender.",
                 "",
                 "Default force-update hotkey: K",
+                "",
+                "Map callout credits:",
+                "Original callouts page: https://hens333.com/callouts",
+                "Images credited by the source page to Lethia.",
+                "The source page is Zexov's modified version of the original build by Broosley and Evo from Hens' Discord.",
             ]
         ),
         encoding="utf-8",

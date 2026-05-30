@@ -20,7 +20,7 @@ from .config import AppConfig, ConfigStore, Profile
 from .detector import DetectionResult, DetectionWorker
 from .focus import FocusGate, get_monitors
 from .hotkeys import HotkeyManager
-from .hens_callouts import import_hens_callouts
+from .hens_callouts import CALLOUTS_URL, import_hens_callouts
 from .maps import MapEntry, MapLibrary
 from .ocr_region import active_ocr_region, compute_auto_ocr_region
 from .overlay import OcrRegionWindow, OverlayWindow, PreviewRenderer
@@ -254,6 +254,18 @@ class OverlayApp:
         ctk.CTkButton(self.map_actions, text="Update Hens Maps", command=self._import_hens_maps, **self._button_style()).grid(
             row=2, column=0, columnspan=2, pady=(10, 0), sticky="ew"
         )
+        ctk.CTkLabel(
+            self.map_actions,
+            text="Callout maps: Hens333 website\nImages credited to Lethia",
+            justify="left",
+            text_color=COLORS["muted"],
+        ).grid(row=3, column=0, columnspan=2, pady=(14, 4), sticky="w")
+        ctk.CTkButton(
+            self.map_actions,
+            text="Open Hens333 Callouts",
+            command=self._open_hens_callouts_site,
+            **self._button_style(secondary=True),
+        ).grid(row=4, column=0, columnspan=2, sticky="ew")
 
         self.tabs = ctk.CTkTabview(
             self.root,
@@ -1161,6 +1173,12 @@ class OverlayApp:
             os.startfile(self.library.maps_path)
         except Exception as exc:
             self.logger.warning("Could not open maps folder: %s", exc)
+
+    def _open_hens_callouts_site(self) -> None:
+        try:
+            os.startfile(CALLOUTS_URL)
+        except Exception as exc:
+            self.logger.warning("Could not open Hens333 callouts website: %s", exc)
 
     def _import_hens_maps(self) -> None:
         self.logger.info("Checking Hens callout map cache")

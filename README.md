@@ -41,7 +41,7 @@ Tesseract must be installed separately. If it is not on `PATH`, set its executab
 
 Use **Update Hens Maps** in the sidebar to download or refresh callout maps from [hens333.com/callouts](https://hens333.com/callouts) into `Maps/Hens Callouts/`. The app also checks this cache on startup. Existing cached images are skipped, so it only downloads maps that are missing locally.
 
-Credit from the source page: images made by Lethia; the page is Zexov's modified version of the original build by Broosley and Evo from Hens' Discord.
+Map callout credit: [Hens333 callouts website](https://hens333.com/callouts). The source page credits the images to Lethia and identifies the page as Zexov's modified version of the original build by Broosley and Evo from Hens' Discord.
 
 ## Packaging
 
