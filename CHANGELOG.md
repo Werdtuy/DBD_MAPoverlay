@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.36
+
+- Fixed local builds with Microsoft Store Python installations that do not keep Visual C++ runtime DLLs beside `python.exe`.
+- Kept the final packaged-runtime verification so incomplete executables are still blocked.
+
 ## Beta 1.35
 
 - Fixed integrated updates by finishing installation after the app closes and asking the user to reopen it manually.

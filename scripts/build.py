@@ -60,12 +60,20 @@ def refresh_shell_icons() -> None:
 def windows_runtime_dlls() -> list[Path]:
     if sys.platform != "win32":
         return []
-    python_dir = Path(sys.executable).resolve().parent
-    dlls = [python_dir / name for name in WINDOWS_RUNTIME_DLLS]
-    missing = [str(path) for path in dlls if not path.exists()]
-    if missing:
-        raise FileNotFoundError(f"Could not find required Windows runtime DLLs: {', '.join(missing)}")
-    return dlls
+    search_dirs = [
+        Path(sys.executable).resolve().parent,
+        Path(sys.prefix).resolve(),
+        Path(sys.base_prefix).resolve(),
+        Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32",
+    ]
+    found = []
+    for name in WINDOWS_RUNTIME_DLLS:
+        path = next((directory / name for directory in search_dirs if (directory / name).exists()), None)
+        if path:
+            found.append(path)
+        else:
+            print(f"Letting PyInstaller resolve Windows runtime dependency: {name}", flush=True)
+    return found
 
 
 def verify_exe_payload(exe_path: Path) -> None:
