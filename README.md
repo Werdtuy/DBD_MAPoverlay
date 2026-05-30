@@ -89,3 +89,7 @@ Build.bat -Console
 Startup crashes are also written to `startup_error.log` beside the executable.
 
 Global hotkeys may require running the packaged app as administrator depending on your Windows configuration.
+
+## Beta Versions
+
+Each committed update gets a version in `CHANGELOG.md`. Small fixes increment versions such as `Beta 1.01` and `Beta 1.02`. Larger feature or UI updates increment versions such as `Beta 1.1` and `Beta 1.2`.

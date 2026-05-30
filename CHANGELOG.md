@@ -1,15 +1,33 @@
 # Changelog
 
-## Unreleased
+## Versioning
+
+- Small fixes and minor refinements increment the hundredths place: `Beta 1.01`, `Beta 1.02`, `Beta 1.03`.
+- Larger features and meaningful UI changes increment the tenths place: `Beta 1.1`, `Beta 1.2`, `Beta 1.3`.
+- Every committed update gets its own beta version section.
+
+## Beta 1.11
+
+- Replaced the rolling Unreleased changelog with explicit beta versions.
+- Documented the beta version numbering rules.
+
+## Beta 1.1
+
+- Added a configurable 4x4 edge-only overlay placement picker.
+- Enlarged the overlay position picker.
+- Moved map controls into a collapsible Map Settings section.
+
+## Beta 1.01
+
+- Fixed click-through styling so the overlay remains visible after launch.
+
+## Beta 1.0
 
 - Added Hens callout map caching and startup loading.
 - Switched map detection to manual OCR force-update only.
 - Added force-update hotkey display in the overlay readout and Detection tab.
 - Made overlay readout two lines: detected map and accuracy.
-- Added configurable 4x4 edge-only overlay placement picker.
-- Enlarged the overlay position picker and moved map controls into a collapsible Map Settings section.
 - Added click-through overlay window support for Windows.
-- Fixed click-through styling so the overlay remains visible after launch.
 - Added automatic settings save/import behavior.
 - Added Tesseract auto-detection and visible search output.
 - Added startup-hidden map sidebar with a compact Maps button.
