@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.21
+
+- Added the running app version to a persistent top status bar.
+- Added a `Check for Updates` button with an in-app availability result.
+
 ## Beta 1.2
 
 - Added `DBDCompanionUpdater.exe` beside the overlay app.

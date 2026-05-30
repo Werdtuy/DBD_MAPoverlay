@@ -67,4 +67,6 @@ Global hotkeys may require running the packaged app as administrator depending o
 
 Keep `DBDCompanionUpdater.exe` in the same folder as `DBDCompanionOverlay.exe`. When the packaged overlay opens, the updater checks the GitHub `latest-beta` release quietly in the background. If an update exists, it downloads the new package, waits for the overlay to close, installs the update, and opens the updated app.
 
+The top status bar shows the running beta version. Use **Check for Updates** there to see whether a newer package is available.
+
 The GitHub Actions workflow publishes a new `latest-beta` package after updates are pushed to `main`. Anonymous updates require the GitHub repository to be public. For a private repository, create `updater_config.json` beside the executables and set `github_token`, or set the `DBD_OVERLAY_GITHUB_TOKEN` environment variable. Do not distribute a personal token inside a shared zip.

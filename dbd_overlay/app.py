@@ -14,6 +14,7 @@ from tkinter import filedialog
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
+from . import __version__
 from .app_logging import configure_logging
 from .config import AppConfig, ConfigStore, Profile
 from .detector import DetectionResult, DetectionWorker
@@ -25,6 +26,7 @@ from .ocr_region import active_ocr_region, compute_auto_ocr_region
 from .overlay import OcrRegionWindow, OverlayWindow, PreviewRenderer
 from .plugins import PluginManager
 from .tesseract import is_tesseract_path, tesseract_search_report
+from .update_status import AppUpdateStatus, check_for_app_update
 from .updates import MapUpdateChecker
 
 
@@ -187,7 +189,27 @@ class OverlayApp:
     def _build_ui(self) -> None:
         self.root.grid_columnconfigure(0, weight=0)
         self.root.grid_columnconfigure(1, weight=1)
-        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+
+        app_header = ctk.CTkFrame(self.root, height=52, corner_radius=0, fg_color=COLORS["sidebar"])
+        app_header.grid(row=0, column=0, columnspan=2, sticky="ew")
+        app_header.grid_columnconfigure(1, weight=1)
+        ctk.CTkLabel(
+            app_header,
+            text=f"DBD Companion Overlay  |  {__version__}",
+            font=ctk.CTkFont(size=15, weight="bold"),
+            text_color=COLORS["text"],
+        ).grid(row=0, column=0, padx=(18, 12), pady=12, sticky="w")
+        self.app_update_status_label = ctk.CTkLabel(app_header, text="", text_color=COLORS["muted"])
+        self.app_update_status_label.grid(row=0, column=1, padx=12, pady=12, sticky="e")
+        self.app_update_button = ctk.CTkButton(
+            app_header,
+            text="Check for Updates",
+            width=138,
+            command=self._check_for_app_updates,
+            **self._button_style(secondary=True),
+        )
+        self.app_update_button.grid(row=0, column=2, padx=(0, 18), pady=10, sticky="e")
 
         self.sidebar_show_button = ctk.CTkButton(
             self.root,
@@ -198,7 +220,7 @@ class OverlayApp:
         )
 
         self.sidebar = ctk.CTkFrame(self.root, width=270, corner_radius=0, fg_color=COLORS["sidebar"])
-        self.sidebar.grid(row=0, column=0, sticky="nsew")
+        self.sidebar.grid(row=1, column=0, sticky="nsew")
         self.sidebar.grid_rowconfigure(2, weight=1)
 
         ctk.CTkLabel(
@@ -241,7 +263,7 @@ class OverlayApp:
             segmented_button_unselected_color=COLORS["panel_dark"],
             segmented_button_unselected_hover_color=COLORS["input_hover"],
         )
-        self.tabs.grid(row=0, column=1, padx=18, pady=18, sticky="nsew")
+        self.tabs.grid(row=1, column=1, padx=18, pady=18, sticky="nsew")
         for name in ("Overlay", "Detection", "Hotkeys", "Logs"):
             self.tabs.add(name)
 
@@ -530,14 +552,14 @@ class OverlayApp:
         visible = self.config.map_library_visible
         if self.sidebar:
             if visible:
-                self.sidebar.grid(row=0, column=0, sticky="nsew")
+                self.sidebar.grid(row=1, column=0, sticky="nsew")
             else:
                 self.sidebar.grid_remove()
         if self.sidebar_show_button:
             if visible:
                 self.sidebar_show_button.grid_remove()
             else:
-                self.sidebar_show_button.grid(row=0, column=0, padx=(14, 0), pady=18, sticky="nw")
+                self.sidebar_show_button.grid(row=1, column=0, padx=(14, 0), pady=18, sticky="nw")
         if self.map_list and visible:
             self.map_list.grid(row=2, column=0, padx=12, pady=0, sticky="nsew")
         if self.map_actions and visible:
@@ -1200,6 +1222,37 @@ class OverlayApp:
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
+
+    def _check_for_app_updates(self) -> None:
+        self.app_update_button.configure(state="disabled", text="Checking...")
+        self.app_update_status_label.configure(text="Checking GitHub...", text_color=COLORS["muted"])
+
+        def worker() -> None:
+            try:
+                status = check_for_app_update(self.root_path, __version__)
+            except Exception as exc:
+                self.root.after(0, lambda error=exc: self._show_app_update_error(error))
+                return
+            self.root.after(0, lambda result=status: self._show_app_update_status(result))
+
+        threading.Thread(target=worker, name="AppUpdateStatusCheck", daemon=True).start()
+
+    def _show_app_update_status(self, status: AppUpdateStatus) -> None:
+        self.app_update_button.configure(state="normal", text="Check for Updates")
+        if status.update_available:
+            self.app_update_status_label.configure(
+                text=f"Update available: {status.latest_version}. It will install after the app closes.",
+                text_color=COLORS["accent_hover"],
+            )
+            self.logger.info("App update available: %s", status.latest_version)
+            return
+        self.app_update_status_label.configure(text=f"Up to date: {status.current_version}", text_color=COLORS["muted"])
+        self.logger.info("App is up to date: %s", status.current_version)
+
+    def _show_app_update_error(self, error: Exception) -> None:
+        self.app_update_button.configure(state="normal", text="Check for Updates")
+        self.app_update_status_label.configure(text="Could not check for updates", text_color=COLORS["accent_hover"])
+        self.logger.warning("Could not check for app updates: %s", error)
 
     def _save_later(self) -> None:
         if self._save_after:
