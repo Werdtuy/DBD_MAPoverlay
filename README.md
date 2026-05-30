@@ -69,4 +69,4 @@ The updater is integrated into `DBDCompanionOverlay.exe`. The app does not check
 
 To test an update, open an older packaged version, select **Check for Updates**, review the changelog, and choose **Update**. Reopen the app after it closes and confirm that the newer beta version appears in the top status bar.
 
-The GitHub Actions workflow publishes a new `latest-beta` package after updates are pushed to `main`. Anonymous updates require the GitHub repository to be public. For a private repository, create `updater_config.json` beside the executables and set `github_token`, or set the `DBD_OVERLAY_GITHUB_TOKEN` environment variable. Do not distribute a personal token inside a shared zip.
+The GitHub Actions workflow publishes a new `latest-beta` package after updates are pushed to `main`. To share automatic updates with other users without personal tokens, the GitHub repository must be public. For private testing, create `updater_config.json` beside the executables and set `github_token`, or set the `DBD_OVERLAY_GITHUB_TOKEN` environment variable. Do not distribute a personal token inside a shared zip.

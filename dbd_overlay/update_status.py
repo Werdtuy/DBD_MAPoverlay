@@ -9,6 +9,8 @@ import re
 import shutil
 import subprocess
 import tempfile
+from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 import zipfile
 
@@ -98,6 +100,13 @@ def _release_asset(release: dict, name: str) -> dict:
     return asset
 
 
+def _public_asset_url(repository: str, tag: str, name: str) -> str:
+    return (
+        f"https://github.com/{quote(repository, safe='/')}/releases/download/"
+        f"{quote(tag, safe='')}/{quote(name, safe='')}"
+    )
+
+
 def check_for_app_update(app_dir: Path, current_version: str) -> AppUpdateStatus:
     config = load_updater_config(app_dir)
     repository = config["repository"].strip()
@@ -106,20 +115,31 @@ def check_for_app_update(app_dir: Path, current_version: str) -> AppUpdateStatus
     if not repository or not tag:
         raise RuntimeError("Updater repository settings are missing")
 
-    release = _request_json(f"https://api.github.com/repos/{repository}/releases/tags/{tag}", token)
     manifest_name = config["manifest_asset"]
-    manifest_asset = _release_asset(release, manifest_name)
-    manifest = _request_json(manifest_asset["url"], token, "application/octet-stream")
+    package_name = config["package_asset"]
+    if token:
+        release = _request_json(f"https://api.github.com/repos/{repository}/releases/tags/{tag}", token)
+        manifest_asset = _release_asset(release, manifest_name)
+        manifest = _request_json(manifest_asset["url"], token, "application/octet-stream")
+        package_url = _release_asset(release, package_name)["url"]
+    else:
+        manifest_url = _public_asset_url(repository, tag, manifest_name)
+        package_url = _public_asset_url(repository, tag, package_name)
+        try:
+            manifest = _request_json(manifest_url, accept="application/json")
+        except HTTPError as exc:
+            if exc.code in {403, 404}:
+                raise RuntimeError("GitHub release is private or unavailable. Public release access is required.") from exc
+            raise
     latest_version = str(manifest.get("version", "")).strip()
     if not latest_version:
         raise RuntimeError("Update manifest does not contain a version")
-    package_asset = _release_asset(release, config["package_asset"])
     changelog = str(manifest.get("changelog", "")).strip() or "No release notes were provided."
     return AppUpdateStatus(
         current_version=current_version,
         latest_version=latest_version,
         changelog=changelog,
-        package_url=package_asset["url"],
+        package_url=package_url,
         github_token=token,
     )
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.38
+
+- Changed public update checks to use direct GitHub release downloads instead of the rate-limited anonymous GitHub API.
+- Added a clear in-app status message when a private GitHub release cannot be accessed without a token.
+
 ## Beta 1.37
 
 - Added a README checklist for testing the integrated update flow from an older packaged beta.

@@ -1353,7 +1353,12 @@ class OverlayApp:
 
     def _show_app_update_error(self, error: Exception) -> None:
         self.app_update_button.configure(state="normal", text="Check for Updates")
-        self.app_update_status_label.configure(text="Could not check for updates", text_color=COLORS["accent_hover"])
+        status_text = (
+            "Private GitHub release: token required"
+            if "public release access is required" in str(error).lower()
+            else "Could not check for updates"
+        )
+        self.app_update_status_label.configure(text=status_text, text_color=COLORS["accent_hover"])
         self.logger.warning("Could not check for app updates: %s", error)
 
     def _save_later(self) -> None:
