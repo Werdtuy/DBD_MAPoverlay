@@ -17,7 +17,7 @@ A lightweight Python companion overlay for Dead by Daylight. It shows local map 
 
 ## Setup
 
-Install Python 3.11+ and Tesseract OCR, then:
+Install Python 3.11+ and [Tesseract OCR](https://github.com/tesseract-ocr/tesseract), then:
 
 ```powershell
 python -m venv .venv
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 python scripts\run.py
 ```
 
-Tesseract must be installed separately. If it is not on `PATH`, set its executable path in the app settings or edit `config/settings.json`.
+Tesseract must be installed separately. Windows installation options are listed in the [official Tesseract installation guide](https://github.com/tesseract-ocr/tessdoc/blob/main/Installation.md). If it is not on `PATH`, set its executable path in the app settings or edit `config/settings.json`.
 
 ## Project Layout
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 1.33
+
+- Added official Tesseract OCR links to the README setup section.
+
 ## Beta 1.32
 
 - Added visible Hens333 callout-map credits and a link to the original callouts website.
