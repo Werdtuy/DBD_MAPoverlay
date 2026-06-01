@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from queue import Queue
 from copy import deepcopy
+from datetime import datetime, timezone
 import shutil
 import sys
 import threading
@@ -21,6 +22,7 @@ from .detector import DetectionResult, DetectionWorker
 from .focus import FocusGate, get_monitors
 from .hotkeys import HotkeyManager
 from .hens_callouts import CALLOUTS_URL, import_hens_callouts
+from .license_gate import LicenseStore
 from .maps import MapEntry, MapLibrary
 from .ocr_region import active_ocr_region, compute_auto_ocr_region
 from .overlay import OcrRegionWindow, OverlayWindow, PreviewRenderer
@@ -277,12 +279,13 @@ class OverlayApp:
             segmented_button_unselected_hover_color=COLORS["input_hover"],
         )
         self.tabs.grid(row=1, column=1, padx=18, pady=18, sticky="nsew")
-        for name in ("Overlay", "Detection", "Hotkeys", "Logs"):
+        for name in ("Overlay", "Detection", "Hotkeys", "Settings", "Logs"):
             self.tabs.add(name)
 
         self._build_overlay_tab(self.tabs.tab("Overlay"))
         self._build_detection_tab(self.tabs.tab("Detection"))
         self._build_hotkeys_tab(self.tabs.tab("Hotkeys"))
+        self._build_settings_tab(self.tabs.tab("Settings"))
         self._build_logs_tab(self.tabs.tab("Logs"))
         self._refresh_map_list()
         self._apply_map_library_visibility()
@@ -499,6 +502,90 @@ class OverlayApp:
             text_color=COLORS["text"],
         )
         self.log_text.grid(row=0, column=0, padx=12, pady=12, sticky="nsew")
+
+    def _build_settings_tab(self, parent: ctk.CTkFrame) -> None:
+        parent.grid_columnconfigure(0, weight=1)
+        details = LicenseStore(self.root_path).load_details()
+        card = ctk.CTkFrame(parent, fg_color=COLORS["panel"], border_width=1, border_color=COLORS["border"])
+        card.grid(row=0, column=0, padx=12, pady=12, sticky="ew")
+        card.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            card,
+            text="License",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=COLORS["text"],
+        ).grid(row=0, column=0, columnspan=2, padx=16, pady=(18, 10), sticky="w")
+        ctk.CTkLabel(card, text="License key", text_color=COLORS["muted"]).grid(
+            row=1, column=0, columnspan=2, padx=16, sticky="w"
+        )
+        self.license_key_entry = ctk.CTkEntry(
+            card,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            text_color=COLORS["text"],
+        )
+        self.license_key_entry.insert(0, details.get("license_key", ""))
+        self.license_key_entry.configure(state="readonly")
+        self.license_key_entry.grid(row=2, column=0, padx=(16, 8), pady=(4, 16), sticky="ew")
+        ctk.CTkButton(
+            card,
+            text="Copy",
+            width=82,
+            command=self._copy_license_key,
+            **self._button_style(secondary=True),
+        ).grid(row=2, column=1, padx=(0, 16), pady=(4, 16), sticky="e")
+        access, expires, remaining = self._license_time_text(details)
+        self._license_detail_row(card, 3, "Access", access)
+        self._license_detail_row(card, 4, "Expiration", expires)
+        self._license_detail_row(card, 5, "Remaining", remaining)
+        max_devices = details.get("max_devices", 0)
+        used_devices = details.get("used_devices", 0)
+        devices = f"{used_devices} out of {max_devices} used" if max_devices else "Unavailable"
+        self._license_detail_row(card, 6, "Devices", devices, bottom_padding=18)
+
+    def _license_detail_row(
+        self,
+        parent: ctk.CTkFrame,
+        row: int,
+        label: str,
+        value: str,
+        bottom_padding: int = 8,
+    ) -> None:
+        ctk.CTkLabel(parent, text=label, text_color=COLORS["muted"]).grid(
+            row=row, column=0, padx=16, pady=(0, bottom_padding), sticky="w"
+        )
+        ctk.CTkLabel(parent, text=value, text_color=COLORS["text"]).grid(
+            row=row, column=1, padx=16, pady=(0, bottom_padding), sticky="e"
+        )
+
+    def _copy_license_key(self) -> None:
+        key = LicenseStore(self.root_path).load_key()
+        if not key:
+            return
+        self.root.clipboard_clear()
+        self.root.clipboard_append(key)
+
+    @staticmethod
+    def _license_time_text(details: dict) -> tuple[str, str, str]:
+        plan = str(details.get("plan", "")).replace("_", " ").title() or "Unavailable"
+        expires_at = details.get("expires_at")
+        if not expires_at:
+            return plan, "Never", "Lifetime access"
+        try:
+            expires = datetime.fromisoformat(str(expires_at).replace("Z", "+00:00"))
+            if expires.tzinfo is None:
+                expires = expires.replace(tzinfo=timezone.utc)
+            remaining = expires - datetime.now(timezone.utc)
+        except ValueError:
+            return plan, str(expires_at), "Unavailable"
+        if remaining.total_seconds() <= 0:
+            remaining_text = "Expired"
+        elif remaining.days:
+            remaining_text = f"{remaining.days} day{'s' if remaining.days != 1 else ''}"
+        else:
+            hours = max(1, int(remaining.total_seconds() // 3600))
+            remaining_text = f"{hours} hour{'s' if hours != 1 else ''}"
+        return plan, expires.astimezone().strftime("%Y-%m-%d %H:%M"), remaining_text
 
     def _slider(self, parent: ctk.CTkFrame, row: int, label: str, value: float, minimum: float, maximum: float, command) -> None:
         box = ctk.CTkFrame(parent, fg_color="transparent")

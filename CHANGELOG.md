@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.6
+
+- Added a Settings tab showing the activated license key, access type, expiration date, remaining time, and device usage.
+- Refreshed saved license details during the required validation check on every app launch.
+
 ## Beta 1.54
 
 - Updated built-in GitHub links for the renamed `DBD_MAP_Overlay` repository.

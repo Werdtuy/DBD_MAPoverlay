@@ -99,17 +99,43 @@ class LicenseStore:
 
     def load_key(self) -> str:
         try:
-            payload = json.loads(self.state_path.read_text(encoding="utf-8"))
+            payload = self._load_state()
             return unprotect_secret(str(payload["license_key_dpapi"]))
         except Exception:
             return ""
 
-    def save_key(self, license_key: str) -> None:
+    def load_details(self) -> dict:
+        payload = self._load_state()
+        return {
+            "license_key": self.load_key(),
+            "plan": str(payload.get("plan", "")),
+            "expires_at": payload.get("expires_at"),
+            "max_devices": int(payload.get("max_devices", 0) or 0),
+            "used_devices": int(payload.get("used_devices", 0) or 0),
+        }
+
+    def save_activation(self, license_key: str, payload: dict) -> None:
         self.state_path.parent.mkdir(parents=True, exist_ok=True)
         self.state_path.write_text(
-            json.dumps({"license_key_dpapi": protect_secret(license_key)}, indent=2),
+            json.dumps(
+                {
+                    "license_key_dpapi": protect_secret(license_key),
+                    "plan": str(payload.get("plan", "")),
+                    "expires_at": payload.get("expires_at"),
+                    "max_devices": int(payload.get("max_devices", 0) or 0),
+                    "used_devices": int(payload.get("used_devices", 0) or 0),
+                },
+                indent=2,
+            ),
             encoding="utf-8",
         )
+
+    def _load_state(self) -> dict:
+        try:
+            payload = json.loads(self.state_path.read_text(encoding="utf-8"))
+            return payload if isinstance(payload, dict) else {}
+        except Exception:
+            return {}
 
 
 def activate_license(store: LicenseStore, license_key: str, app_version: str) -> dict:
@@ -215,7 +241,7 @@ class LicenseDialog:
         self.root.update_idletasks()
         try:
             payload = activate_license(self.store, license_key, self.app_version)
-            self.store.save_key(license_key)
+            self.store.save_activation(license_key, payload)
         except Exception as exc:
             self.status.configure(text=str(exc))
             return
@@ -237,7 +263,8 @@ def require_valid_license(root: Path, app_version: str) -> bool:
     initial_message = ""
     if stored_key:
         try:
-            activate_license(store, stored_key, app_version)
+            payload = activate_license(store, stored_key, app_version)
+            store.save_activation(stored_key, payload)
             return True
         except Exception as exc:
             initial_message = str(exc)
