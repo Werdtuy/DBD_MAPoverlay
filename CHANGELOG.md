@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.53
+
+- Updated in-app installs to merge every shipped file and newly added folder from the release package.
+- Preserved local settings, downloaded maps, and other user files that are not replaced by the release.
+
 ## Beta 1.52
 
 - Fixed license activation after in-place updates from older beta builds.
