@@ -16,7 +16,7 @@ import zipfile
 
 
 DEFAULT_CONFIG = {
-    "repository": "Werdtuy/DBD_MAPoverlay",
+    "repository": "Werdtuy/DBD_MAP_Overlay",
     "release_tag": "latest-beta",
     "package_asset": "DBDCompanionOverlay.zip",
     "manifest_asset": "update_manifest.json",

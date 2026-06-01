@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 1.54
+
+- Updated built-in GitHub links for the renamed `DBD_MAP_Overlay` repository.
+
 ## Beta 1.53
 
 - Updated in-app installs to merge every shipped file and newly added folder from the release package.

@@ -17,7 +17,7 @@ from pathlib import Path
 APP_NAME = "DBDCompanionOverlay"
 WINDOWS_RUNTIME_DLLS = ("vcruntime140.dll", "vcruntime140_1.dll")
 DEFAULT_UPDATER_CONFIG = {
-    "repository": "Werdtuy/DBD_MAPoverlay",
+    "repository": "Werdtuy/DBD_MAP_Overlay",
     "release_tag": "latest-beta",
     "package_asset": "DBDCompanionOverlay.zip",
     "manifest_asset": "update_manifest.json",
