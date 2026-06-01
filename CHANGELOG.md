@@ -1,5 +1,11 @@
 # Changelog
 
+## Beta 1.5
+
+- Added required license-key activation before the overlay starts.
+- Stored activated keys locally with Windows DPAPI protection.
+- Kept license validation startup-only so gameplay has no additional background activity.
+
 ## Beta 1.39
 
 - Removed private deployment details from the public project files.

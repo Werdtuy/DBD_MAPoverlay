@@ -28,9 +28,15 @@ def write_startup_error(exc: BaseException) -> None:
 
 def main() -> int:
     try:
-        from .app import OverlayApp
+        from . import __version__
+        from .license_gate import require_valid_license
 
         root = app_root()
+        if not require_valid_license(root, __version__):
+            return 0
+
+        from .app import OverlayApp
+
         app = OverlayApp(root)
         app.run()
     except Exception as exc:  # pragma: no cover - startup safety net

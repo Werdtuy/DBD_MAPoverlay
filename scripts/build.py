@@ -22,6 +22,7 @@ DEFAULT_UPDATER_CONFIG = {
     "manifest_asset": "update_manifest.json",
     "github_token": "",
 }
+LICENSE_CONFIG_FILE = "license_config.json"
 
 
 def run(command: list[str]) -> None:
@@ -102,7 +103,28 @@ def release_notes(changelog_path: Path, version: str) -> str:
     return "\n".join(notes).strip() or "No release notes were provided."
 
 
-def create_release_zip(root: Path, exe_path: Path, manifest: dict[str, str]) -> Path:
+def load_license_config(root: Path) -> dict[str, str]:
+    server_url = os.environ.get("DBD_OVERLAY_LICENSE_SERVER_URL", "").strip()
+    if not server_url:
+        config_path = root / LICENSE_CONFIG_FILE
+        try:
+            server_url = str(json.loads(config_path.read_text(encoding="utf-8"))["server_url"]).strip()
+        except Exception as exc:
+            raise RuntimeError(
+                "License server URL is missing. Set DBD_OVERLAY_LICENSE_SERVER_URL or add a private license_config.json."
+            ) from exc
+    server_url = server_url.rstrip("/")
+    if not server_url.startswith("https://"):
+        raise RuntimeError("License server URL must use HTTPS.")
+    return {"server_url": server_url}
+
+
+def create_release_zip(
+    root: Path,
+    exe_path: Path,
+    manifest: dict[str, str],
+    license_config: dict[str, str],
+) -> Path:
     release_dir = root / "release"
     package_dir = release_dir / APP_NAME
     zip_path = release_dir / f"{APP_NAME}.zip"
@@ -116,6 +138,7 @@ def create_release_zip(root: Path, exe_path: Path, manifest: dict[str, str]) -> 
         json.dumps(DEFAULT_UPDATER_CONFIG, indent=2),
         encoding="utf-8",
     )
+    (package_dir / LICENSE_CONFIG_FILE).write_text(json.dumps(license_config, indent=2), encoding="utf-8")
     (package_dir / "version.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     (package_dir / "Maps").mkdir(exist_ok=True)
     (package_dir / "config").mkdir(exist_ok=True)
@@ -173,6 +196,7 @@ def main() -> int:
         "version": app_version,
         "changelog": release_notes(root / "CHANGELOG.md", app_version),
     }
+    license_config = load_license_config(root)
 
     if not run_py.exists():
         raise FileNotFoundError(f"Could not find {run_py}")
@@ -241,7 +265,7 @@ def main() -> int:
     print("", flush=True)
     print("Build complete:", flush=True)
     print(exe_path, flush=True)
-    zip_path = create_release_zip(root, exe_path, manifest)
+    zip_path = create_release_zip(root, exe_path, manifest, license_config)
     print("", flush=True)
     print("Shareable zip created:", flush=True)
     print(zip_path, flush=True)

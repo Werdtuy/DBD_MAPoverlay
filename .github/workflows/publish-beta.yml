@@ -24,6 +24,8 @@ jobs:
 
       - name: Build overlay
         run: python scripts/build.py -Windowed
+        env:
+          DBD_OVERLAY_LICENSE_SERVER_URL: ${{ secrets.LICENSE_SERVER_URL }}
 
       - name: Read package version
         shell: pwsh
