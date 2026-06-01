@@ -8,6 +8,7 @@ import runpy
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
 from pathlib import Path
@@ -80,8 +81,8 @@ def windows_runtime_dlls() -> list[Path]:
 def verify_exe_payload(exe_path: Path) -> None:
     from PyInstaller.archive.readers import CArchiveReader
 
-    names = {name.lower() for name in CArchiveReader(str(exe_path)).toc}
-    expected = {"python312.dll", *WINDOWS_RUNTIME_DLLS}
+    names = {Path(name).name.lower() for name in CArchiveReader(str(exe_path)).toc}
+    expected = {"python312.dll", LICENSE_CONFIG_FILE, *WINDOWS_RUNTIME_DLLS}
     missing = sorted(name for name in expected if name not in names)
     if missing:
         raise RuntimeError(f"Built executable is missing required runtime files: {', '.join(missing)}")
@@ -212,6 +213,9 @@ def main() -> int:
     run([sys.executable, "-m", "pip", "install", "-r", str(root / "requirements.txt")])
 
     window_mode = "--console" if args.console else "--windowed"
+    bundled_config_dir = Path(tempfile.mkdtemp(prefix="dbd-overlay-build-input-"))
+    bundled_license_config = bundled_config_dir / LICENSE_CONFIG_FILE
+    bundled_license_config.write_text(json.dumps(license_config, indent=2), encoding="utf-8")
     pyinstaller_args = [
         sys.executable,
         "-m",
@@ -243,6 +247,7 @@ def main() -> int:
     ]
     if assets_dir.exists():
         pyinstaller_args.extend(["--add-data", f"{assets_dir}{os.pathsep}assets"])
+    pyinstaller_args.extend(["--add-data", f"{bundled_license_config}{os.pathsep}."])
     for runtime_dll in windows_runtime_dlls():
         pyinstaller_args.extend(["--add-binary", f"{runtime_dll}{os.pathsep}."])
     print(f"Using icon: {icon_path}", flush=True)
@@ -250,7 +255,10 @@ def main() -> int:
     pyinstaller_args.append(str(run_py))
 
     print(f"Building {APP_NAME}.exe...", flush=True)
-    run(pyinstaller_args)
+    try:
+        run(pyinstaller_args)
+    finally:
+        shutil.rmtree(bundled_config_dir, ignore_errors=True)
     verify_exe_payload(exe_path)
     refresh_shell_icons()
 

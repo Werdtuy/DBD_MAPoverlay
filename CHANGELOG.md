@@ -1,5 +1,10 @@
 # Changelog
 
+## Beta 1.52
+
+- Fixed license activation after in-place updates from older beta builds.
+- Embedded a packaged activation fallback and copied required sidecar files during future updates.
+
 ## Beta 1.51
 
 - Updated the GitHub beta publisher to Node 24-compatible official actions.

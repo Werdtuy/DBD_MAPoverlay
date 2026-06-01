@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import sys
 from tkinter import messagebox
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -82,14 +83,19 @@ class LicenseStore:
         self.server_config_path = root / LICENSE_CONFIG_FILE
 
     def server_url(self) -> str:
-        try:
-            payload = json.loads(self.server_config_path.read_text(encoding="utf-8"))
-            url = str(payload["server_url"]).strip().rstrip("/")
-        except Exception as exc:
-            raise RuntimeError("The activation service configuration is missing. Reinstall the app package.") from exc
-        if not url.startswith("https://"):
-            raise RuntimeError("The activation service configuration is invalid. Reinstall the app package.")
-        return url
+        config_paths = [self.server_config_path]
+        bundled_dir = getattr(sys, "_MEIPASS", "")
+        if bundled_dir:
+            config_paths.append(Path(bundled_dir) / LICENSE_CONFIG_FILE)
+        for config_path in config_paths:
+            try:
+                payload = json.loads(config_path.read_text(encoding="utf-8"))
+                url = str(payload["server_url"]).strip().rstrip("/")
+            except Exception:
+                continue
+            if url.startswith("https://"):
+                return url
+        raise RuntimeError("The activation service configuration is missing. Reinstall the app package.")
 
     def load_key(self) -> str:
         try:
