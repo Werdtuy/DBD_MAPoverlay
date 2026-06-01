@@ -26,7 +26,7 @@ if "%PYTHON%"=="" (
 )
 
 echo Using Python: %PYTHON%
-%PYTHON% "%ROOT%scripts\build.py" %*
+%PYTHON% "%ROOT%scripts\build.py" -PromptLicenseConfig %*
 if errorlevel 1 goto fail
 
 echo.

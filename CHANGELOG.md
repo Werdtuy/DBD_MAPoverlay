@@ -1,5 +1,9 @@
 # Changelog
 
+## Beta 1.61
+
+- Added a first-run private activation-URL prompt to `Build.bat` when the ignored local license configuration is missing.
+
 ## Beta 1.6
 
 - Added a Settings tab showing the activated license key, access type, expiration date, remaining time, and device usage.

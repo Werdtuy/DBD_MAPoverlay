@@ -104,20 +104,30 @@ def release_notes(changelog_path: Path, version: str) -> str:
     return "\n".join(notes).strip() or "No release notes were provided."
 
 
-def load_license_config(root: Path) -> dict[str, str]:
+def load_license_config(root: Path, prompt_if_missing: bool = False) -> dict[str, str]:
     server_url = os.environ.get("DBD_OVERLAY_LICENSE_SERVER_URL", "").strip()
+    config_path = root / LICENSE_CONFIG_FILE
+    prompted = False
     if not server_url:
-        config_path = root / LICENSE_CONFIG_FILE
         try:
             server_url = str(json.loads(config_path.read_text(encoding="utf-8"))["server_url"]).strip()
         except Exception as exc:
-            raise RuntimeError(
-                "License server URL is missing. Set DBD_OVERLAY_LICENSE_SERVER_URL or add a private license_config.json."
-            ) from exc
+            if not prompt_if_missing:
+                raise RuntimeError(
+                    "License server URL is missing. Set DBD_OVERLAY_LICENSE_SERVER_URL or add a private license_config.json."
+                ) from exc
+            print("", flush=True)
+            print("Private build configuration is missing.", flush=True)
+            server_url = input("Enter the HTTPS activation service URL: ").strip()
+            prompted = True
     server_url = server_url.rstrip("/")
     if not server_url.startswith("https://"):
         raise RuntimeError("License server URL must use HTTPS.")
-    return {"server_url": server_url}
+    config = {"server_url": server_url}
+    if prompted:
+        config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+        print(f"Saved private ignored build configuration: {config_path}", flush=True)
+    return config
 
 
 def create_release_zip(
@@ -184,6 +194,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build the DBD Companion Overlay executable.")
     parser.add_argument("-Windowed", action="store_true", dest="windowed")
     parser.add_argument("-Console", action="store_true", dest="console")
+    parser.add_argument("-PromptLicenseConfig", action="store_true", dest="prompt_license_config")
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parent.parent
@@ -197,7 +208,7 @@ def main() -> int:
         "version": app_version,
         "changelog": release_notes(root / "CHANGELOG.md", app_version),
     }
-    license_config = load_license_config(root)
+    license_config = load_license_config(root, prompt_if_missing=args.prompt_license_config)
 
     if not run_py.exists():
         raise FileNotFoundError(f"Could not find {run_py}")
